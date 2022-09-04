@@ -21,7 +21,18 @@ def generate_dataSet():
         [2, 0, 0, 0, 'no']]
     features = ['年龄', '有工作', '有自己的房子', '信贷情况']	
     return dataSet, features
-
+'''
+计算香农经验熵
+'''
 def calcEntropy(dataSet):
-    
-    
+    numEntries = len(dataSet)
+    labelCounts = {}
+    for featVect in dataSet:
+        currentLabel = featVect[-1]
+        if currentLabel not in labelCounts.keys():
+            labelCounts[currentLabel] = 0
+        labelCounts[currentLabel] += 1
+        
+    Entropy = 0.0
+    for key in labelCounts:
+        prob = float(labelCounts[key])/numEntries
