@@ -59,10 +59,11 @@ def trainBayes(trainMat,classVec):
     numWords = len(trainMat[0])
     # 先验概率
     pAbusive = classVec.count(1)/numsDocs
-    p0Nums = np.zeros(numWords)
-    p1Nums = np.zeros(numWords)
-    p0Denom = 0.0
-    p1Denom = 0.0
+    # 加入拉普拉斯平滑
+    p0Nums = np.ones(numWords)
+    p1Nums = np.ones(numWords)
+    p0Denom = 2.0
+    p1Denom = 2.0
     for i in range(numsDocs):
         if classVec[i] == 1:
             p1Nums += trainMat[i]
@@ -70,8 +71,8 @@ def trainBayes(trainMat,classVec):
         else:
             p0Nums += trainMat[i]
             p0Denom += sum(trainMat[i])
-    p1Vect = p1Nums/p1Denom
-    p0Vect = p0Nums/p0Denom
+    p1Vect = np.log(p1Nums/p1Denom)
+    p0Vect = np.log(p0Nums/p0Denom)
     return p0Vect,p1Vect,pAbusive
 
 '''
@@ -86,8 +87,8 @@ Returns:
     1 - 侮辱类
 '''
 def claaifyNB(vec2Classify,p0Vec,p1Vec,pClass1):
-    p1 = reduce(lambda x,y:x**y,vec2Classify*p1Vec)*pClass1
-    p0 = reduce(lambda x,y:x*y,vec2Classify*p0Vec)*(1.0-pClass1)
+    p1 = sum(vec2Classify*p1Vec) + np.log(pClass1)
+    p0 = sum(vec2Classify*p0Vec) + np.log(1.0-pClass1)
     print("p0=",p0)
     print("p1=",p1)
     if p1 > p0:
@@ -107,8 +108,11 @@ def testBayes():
         trainMat.append(setOfWords2Vec(myVocabList,postinDoc))
     print('trainMat:\n',trainMat)
     p0Vect,p1Vect,pAbusive = trainBayes(trainMat,classVec)
+    print("p0Vect:",p0Vect)
+    print("p1Vect:",p1Vect)
     testEntry = ['stupid']
     thisDoc = np.array(setOfWords2Vec(myVocabList,testEntry))
+    print(thisDoc)
     if claaifyNB(thisDoc,p0Vect,p1Vect,pAbusive):
         print(testEntry,"属于侮辱类")
     else:
